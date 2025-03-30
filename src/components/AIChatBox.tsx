@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Bot, User, ArrowDown, Lightbulb, X } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
+import { aiService } from '@/services/aiService';
 
 interface ChatMessage {
   id: string;
@@ -13,29 +14,44 @@ interface ChatMessage {
   timestamp: Date;
 }
 
-const SAMPLE_MESSAGES: ChatMessage[] = [
-  {
-    id: '1',
-    content: "Hello! I'm your AI shopping assistant. I can help you find the best deals, compare prices, or give advice on when to buy. What would you like to know?",
-    sender: 'bot',
-    timestamp: new Date()
-  }
-];
-
 interface AIChatBoxProps {
   productName?: string;
+  productId?: string;
+  currentPrice?: number;
   isOpen: boolean;
   onClose: () => void;
   className?: string;
 }
 
-const AIChatBox = ({ productName, isOpen, onClose, className }: AIChatBoxProps) => {
-  const [messages, setMessages] = useState<ChatMessage[]>(SAMPLE_MESSAGES);
+const AIChatBox = ({ 
+  productName, 
+  productId,
+  currentPrice,
+  isOpen, 
+  onClose, 
+  className 
+}: AIChatBoxProps) => {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   
-  const handleSend = () => {
+  // Initialize chat with a welcome message
+  useEffect(() => {
+    if (messages.length === 0) {
+      const initialMessage: ChatMessage = {
+        id: '1',
+        content: productName 
+          ? `Hello! I'm your AI shopping assistant. I can help you decide if now is a good time to buy ${productName} or if you should wait for a better price. What would you like to know?`
+          : "Hello! I'm your AI shopping assistant. I can help you find the best deals, compare prices, or give advice on when to buy. What would you like to know?",
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages([initialMessage]);
+    }
+  }, [messages.length, productName]);
+  
+  const handleSend = async () => {
     if (!input.trim()) return;
     
     // Add user message
@@ -50,26 +66,47 @@ const AIChatBox = ({ productName, isOpen, onClose, className }: AIChatBoxProps) 
     setInput('');
     setIsLoading(true);
     
-    // Simulate AI response
-    setTimeout(() => {
-      const responses = [
-        `Based on historical price data, this ${productName || 'product'} is currently at a good price point. It's about 15% lower than its average price over the last 3 months.`,
-        `I'd recommend waiting if you can. Looking at price trends, this ${productName || 'product'} typically goes on sale during end-of-month promotions.`,
-        `There are similar products with better ratings at the same price point. Would you like me to suggest alternatives?`,
-        `This is actually the lowest price this ${productName || 'product'} has been in the last 6 months! It's a great time to buy.`,
-        `While this store has it for $199, I found the same model on another site for $179. Would you like me to share that link?`
-      ];
+    try {
+      let response: string;
+      
+      // If we have product context, use the personalized advice
+      if (productName && currentPrice) {
+        response = await aiService.getPersonalizedAdvice(
+          productName,
+          currentPrice,
+          userMessage.content
+        );
+      } else {
+        // Generic AI response based on predefined options
+        const responses = [
+          "Based on historical price data, this product is currently at a good price point. It's about 15% lower than its average price over the last 3 months.",
+          "I'd recommend waiting if you can. Looking at price trends, this product typically goes on sale during end-of-month promotions.",
+          "There are similar products with better ratings at the same price point. Would you like me to suggest alternatives?",
+          "This is actually the lowest price this product has been in the last 6 months! It's a great time to buy.",
+          "While this store has it for $199, I found the same model on another site for $179. Would you like me to share that link?"
+        ];
+        
+        response = responses[Math.floor(Math.random() * responses.length)];
+      }
       
       const botMessage: ChatMessage = {
         id: Date.now().toString(),
-        content: responses[Math.floor(Math.random() * responses.length)],
+        content: response,
         sender: 'bot',
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('Error getting AI response', error);
+      toast({
+        title: "Error",
+        description: "Couldn't get a response from the AI assistant. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

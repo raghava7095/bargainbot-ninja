@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import SearchBar from '@/components/SearchBar';
 import CategoryCard from '@/components/CategoryCard';
@@ -7,10 +6,34 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Smartphone, Laptop, Camera, Tv, Watch, Clock, Headphones, 
-  Heart, Zap, Percent, Award, TrendingUp 
+  Heart, Zap, Percent, Award, TrendingUp, Search, Star 
 } from 'lucide-react';
 
-// Mock data
+const Bot = (props: any) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <rect width="18" height="14" x="3" y="6" rx="2" />
+      <circle cx="12" cy="13" r="3" />
+      <path d="M5 3v3" />
+      <path d="M19 3v3" />
+      <path d="M8 13h.01" />
+      <path d="M16 13h.01" />
+      <path d="M12 18v3" />
+    </svg>
+  );
+};
+
 const featuredProducts: Product[] = [
   {
     id: '1',

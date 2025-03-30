@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
@@ -18,12 +17,12 @@ import {
   X, 
   ChevronDown,
   ChevronUp,
-  Store
+  Store,
+  Star
 } from 'lucide-react';
 import ProductCard, { Product } from '@/components/ProductCard';
 import { Separator } from '@/components/ui/separator';
 
-// Mock data for search results
 const mockProducts: Product[] = [
   {
     id: '1',
@@ -155,14 +154,11 @@ const SearchResults = () => {
   const [selectedStores, setSelectedStores] = useState<string[]>([]);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   
-  // Simulate loading results on query change
   useEffect(() => {
     setIsLoading(true);
     
-    // Simulate API call
     const timer = setTimeout(() => {
       setSearchResults(
-        // Simulate filtered results based on the query
         mockProducts.filter(product => 
           product.title.toLowerCase().includes(query.toLowerCase())
         )
@@ -173,7 +169,6 @@ const SearchResults = () => {
     return () => clearTimeout(timer);
   }, [query]);
   
-  // Handle sort change
   const handleSortChange = (value: string) => {
     setSortBy(value);
     
@@ -197,14 +192,12 @@ const SearchResults = () => {
         sortedResults.sort((a, b) => b.rating - a.rating);
         break;
       default:
-        // Best match - default order
         break;
     }
     
     setSearchResults(sortedResults);
   };
   
-  // Handle filter toggles
   const toggleStoreFilter = (store: string) => {
     setSelectedStores(prev => 
       prev.includes(store) 
@@ -221,23 +214,19 @@ const SearchResults = () => {
     );
   };
   
-  // Apply filters
   const applyFilters = () => {
     let filteredResults = [...mockProducts];
     
-    // Filter by price range
     filteredResults = filteredResults.filter(
       product => product.currentPrice >= priceRange[0] && product.currentPrice <= priceRange[1]
     );
     
-    // Filter by selected stores
     if (selectedStores.length > 0) {
       filteredResults = filteredResults.filter(
         product => selectedStores.includes(product.store)
       );
     }
     
-    // Filter by selected ratings
     if (selectedRatings.length > 0) {
       filteredResults = filteredResults.filter(
         product => selectedRatings.includes(Math.floor(product.rating))
@@ -247,13 +236,11 @@ const SearchResults = () => {
     setSearchResults(filteredResults);
   };
   
-  // Reset filters
   const resetFilters = () => {
     setPriceRange([0, 1200]);
     setSelectedStores([]);
     setSelectedRatings([]);
     
-    // Reset to original search results
     setSearchResults(
       mockProducts.filter(product => 
         product.title.toLowerCase().includes(query.toLowerCase())
@@ -263,7 +250,6 @@ const SearchResults = () => {
   
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Search Header */}
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <h1 className="text-2xl font-bold">Search Results for "{query}"</h1>
@@ -295,7 +281,6 @@ const SearchResults = () => {
           </div>
         </div>
         
-        {/* Search Stats */}
         <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between">
           <p className="text-gray-600">
             Found {searchResults.length} results ({isLoading ? '...' : '0.5'} seconds)
@@ -319,7 +304,6 @@ const SearchResults = () => {
         </div>
       </div>
       
-      {/* Filters Panel */}
       {showFilters && (
         <div className="mb-8 p-4 bg-gray-50 rounded-lg border animate-fade-in">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
@@ -331,7 +315,6 @@ const SearchResults = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Price Range Filter */}
             <div>
               <h4 className="text-sm font-medium mb-2">Price Range</h4>
               <div className="px-2">
@@ -350,7 +333,6 @@ const SearchResults = () => {
               </div>
             </div>
             
-            {/* Stores Filter */}
             <div>
               <h4 className="text-sm font-medium mb-2">Stores</h4>
               <div className="space-y-2">
@@ -372,7 +354,6 @@ const SearchResults = () => {
               </div>
             </div>
             
-            {/* Ratings Filter */}
             <div>
               <h4 className="text-sm font-medium mb-2">Ratings</h4>
               <div className="space-y-2">
@@ -403,7 +384,6 @@ const SearchResults = () => {
         </div>
       )}
       
-      {/* Search Results */}
       <div>
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

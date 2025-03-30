@@ -1,11 +1,45 @@
 
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, User, ShoppingCart, Menu, X } from "lucide-react";
+import { Search, User, ShoppingCart, Menu, X, LogOut } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+interface UserData {
+  name?: string;
+  email: string;
+  isLoggedIn: boolean;
+}
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<UserData | null>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Check if user is logged in on component mount
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Error parsing user data from localStorage', e);
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+      variant: "default",
+    });
+    navigate('/');
+  };
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
@@ -42,12 +76,25 @@ const Navbar = () => {
             <Button variant="ghost" size="icon">
               <Search className="h-5 w-5" />
             </Button>
-            <Button variant="outline" asChild>
-              <Link to="/login">Sign In</Link>
-            </Button>
-            <Button asChild>
-              <Link to="/register">Get Started</Link>
-            </Button>
+            
+            {user?.isLoggedIn ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-700">Hi, {user.name || user.email.split('@')[0]}</span>
+                <Button variant="outline" onClick={handleLogout} className="flex items-center space-x-2">
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button variant="outline" asChild>
+                  <Link to="/login">Sign In</Link>
+                </Button>
+                <Button asChild>
+                  <Link to="/register">Get Started</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -92,23 +139,40 @@ const Navbar = () => {
               About
             </Link>
             <div className="pt-4 pb-3 border-t border-gray-200">
-              <div className="flex items-center px-3 space-x-2">
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
-                  asChild
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Link to="/login">Sign In</Link>
-                </Button>
-                <Button 
-                  className="w-full" 
-                  asChild
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Link to="/register">Get Started</Link>
-                </Button>
-              </div>
+              {user?.isLoggedIn ? (
+                <div className="px-3 space-y-2">
+                  <p className="text-sm font-medium">Hi, {user.name || user.email.split('@')[0]}</p>
+                  <Button 
+                    onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center"
+                    variant="outline"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center px-3 space-x-2">
+                  <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    asChild
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Link to="/login">Sign In</Link>
+                  </Button>
+                  <Button 
+                    className="w-full" 
+                    asChild
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Link to="/register">Get Started</Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>

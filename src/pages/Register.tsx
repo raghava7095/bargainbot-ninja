@@ -1,35 +1,33 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { EyeIcon, EyeOffIcon, ArrowRight, Check } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+
+interface RegisterFormValues {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
 
 const Register = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedTerms, setAgreedTerms] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterFormValues>();
+  const password = watch('password');
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
+  const onSubmit = async (data: RegisterFormValues) => {
     if (!agreedTerms) {
       toast({
         title: "Terms & Conditions Required",
@@ -39,12 +37,37 @@ const Register = () => {
       return;
     }
     
-    // Simulate registration
-    toast({
-      title: "Registration Successful",
-      description: "Welcome to BargainBotNinja! Get ready to find amazing deals.",
-      variant: "default",
-    });
+    setIsLoading(true);
+    
+    try {
+      // Simulate API call for registration
+      // In a real app, this would be a fetch call to your registration API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Store user info in local storage (in a real app, you would store a JWT token)
+      localStorage.setItem('user', JSON.stringify({ 
+        name: data.name,
+        email: data.email,
+        isLoggedIn: true 
+      }));
+      
+      toast({
+        title: "Registration Successful",
+        description: "Welcome to BargainBotNinja! Get ready to find amazing deals.",
+        variant: "default",
+      });
+      
+      navigate('/');
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast({
+        title: "Registration Failed",
+        description: "There was a problem creating your account. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -57,7 +80,7 @@ const Register = () => {
           </p>
         </div>
         
-        <form className="mt-8 space-y-6" onSubmit={handleRegister}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -65,14 +88,16 @@ const Register = () => {
               </label>
               <Input
                 id="name"
-                name="name"
                 type="text"
                 autoComplete="name"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="mt-1"
+                {...register("name", { 
+                  required: "Name is required"
+                })}
+                className={`mt-1 ${errors.name ? "border-red-500" : ""}`}
               />
+              {errors.name && (
+                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+              )}
             </div>
             
             <div>
@@ -81,14 +106,20 @@ const Register = () => {
               </label>
               <Input
                 id="email"
-                name="email"
                 type="email"
                 autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1"
+                {...register("email", { 
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address"
+                  }
+                })}
+                className={`mt-1 ${errors.email ? "border-red-500" : ""}`}
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              )}
             </div>
             
             <div>
@@ -98,12 +129,16 @@ const Register = () => {
               <div className="mt-1 relative">
                 <Input
                   id="password"
-                  name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register("password", { 
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "Password must be at least 6 characters"
+                    }
+                  })}
+                  className={errors.password ? "border-red-500" : ""}
                 />
                 <button
                   type="button"
@@ -117,6 +152,9 @@ const Register = () => {
                   )}
                 </button>
               </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              )}
             </div>
             
             <div>
@@ -126,12 +164,13 @@ const Register = () => {
               <div className="mt-1 relative">
                 <Input
                   id="confirm-password"
-                  name="confirm-password"
                   type={showConfirmPassword ? "text" : "password"}
                   autoComplete="new-password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  {...register("confirmPassword", { 
+                    required: "Please confirm your password",
+                    validate: value => value === password || "Passwords do not match"
+                  })}
+                  className={errors.confirmPassword ? "border-red-500" : ""}
                 />
                 <button
                   type="button"
@@ -145,6 +184,9 @@ const Register = () => {
                   )}
                 </button>
               </div>
+              {errors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+              )}
             </div>
             
             <div className="flex items-start">
@@ -176,8 +218,8 @@ const Register = () => {
             </div>
           </div>
           
-          <Button type="submit" className="w-full" size="lg">
-            Create account
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+            {isLoading ? "Creating account..." : "Create account"}
           </Button>
           
           <Separator className="my-6" />

@@ -1,29 +1,56 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { EyeIcon, EyeOffIcon, ArrowRight, Check } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+
+interface LoginFormValues {
+  email: string;
+  password: string;
+}
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: LoginFormValues) => {
+    setIsLoading(true);
     
-    // Simulate login
-    toast({
-      title: "Login Successful",
-      description: "Welcome back to BargainBotNinja!",
-      variant: "default",
-    });
+    try {
+      // Simulate API call for authentication
+      // In a real app, this would be a fetch call to your authentication API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Store user info in local storage (in a real app, you would store a JWT token)
+      localStorage.setItem('user', JSON.stringify({ email: data.email, isLoggedIn: true }));
+      
+      toast({
+        title: "Login Successful",
+        description: "Welcome back to BargainBotNinja!",
+        variant: "default",
+      });
+      
+      navigate('/');
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login Failed",
+        description: "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -36,7 +63,7 @@ const Login = () => {
           </p>
         </div>
         
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -44,14 +71,20 @@ const Login = () => {
               </label>
               <Input
                 id="email"
-                name="email"
                 type="email"
                 autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1"
+                {...register("email", { 
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address"
+                  }
+                })}
+                className={`mt-1 ${errors.email ? "border-red-500" : ""}`}
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              )}
             </div>
             
             <div>
@@ -66,12 +99,16 @@ const Login = () => {
               <div className="mt-1 relative">
                 <Input
                   id="password"
-                  name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register("password", { 
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "Password must be at least 6 characters"
+                    }
+                  })}
+                  className={errors.password ? "border-red-500" : ""}
                 />
                 <button
                   type="button"
@@ -85,6 +122,9 @@ const Login = () => {
                   )}
                 </button>
               </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              )}
             </div>
             
             <div className="flex items-center justify-between">
@@ -101,8 +141,8 @@ const Login = () => {
             </div>
           </div>
           
-          <Button type="submit" className="w-full" size="lg">
-            Sign in
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+            {isLoading ? "Signing in..." : "Sign in"}
           </Button>
           
           <Separator className="my-6" />

@@ -26,7 +26,7 @@ const CategoryCard = ({
     <Link 
       to={href}
       className={cn(
-        "block rounded-xl p-6 transition-all duration-200 hover:shadow-md",
+        "block rounded-xl p-6 transition-all duration-200 hover:shadow-md hover:scale-105",
         bgColor,
         className
       )}

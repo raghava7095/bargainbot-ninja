@@ -54,7 +54,7 @@ export const backendService = {
         // we're not including properties that don't exist in the Product interface
         currentPrice: p.price,
         originalPrice: p.originalPrice || p.price,
-        discountPercentage: p.discountPercentage,
+        // Remove discountPercentage as it's not in the Product interface
         store: mapRetailerToStore(p.retailer),
         inStock: p.inStock,
         priceChange: {
@@ -85,7 +85,7 @@ export const backendService = {
         rating: product.rating,
         currentPrice: product.price,
         originalPrice: product.originalPrice || product.price,
-        discountPercentage: product.discountPercentage,
+        // Remove discountPercentage as it's not in the Product interface
         store: mapRetailerToStore(product.retailer),
         inStock: product.inStock,
         priceChange: {
@@ -154,7 +154,7 @@ export const backendService = {
         rating: p.rating,
         currentPrice: p.price,
         originalPrice: p.originalPrice || p.price,
-        discountPercentage: p.discountPercentage,
+        // Remove discountPercentage as it's not in the Product interface
         store: mapRetailerToStore(p.retailer),
         inStock: p.inStock,
         priceChange: {

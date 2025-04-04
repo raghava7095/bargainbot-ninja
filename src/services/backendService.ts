@@ -56,7 +56,7 @@ export const backendService = {
         originalPrice: p.originalPrice || p.price,
         // Remove discountPercentage as it's not in the Product interface
         store: mapRetailerToStore(p.retailer),
-        inStock: p.inStock,
+        // Remove inStock as it's not in the Product interface
         priceChange: {
           amount: 0,
           direction: 'stable' as const
@@ -87,7 +87,7 @@ export const backendService = {
         originalPrice: product.originalPrice || product.price,
         // Remove discountPercentage as it's not in the Product interface
         store: mapRetailerToStore(product.retailer),
-        inStock: product.inStock,
+        // Remove inStock as it's not in the Product interface
         priceChange: {
           amount: 0,
           direction: 'stable' as const
@@ -156,7 +156,7 @@ export const backendService = {
         originalPrice: p.originalPrice || p.price,
         // Remove discountPercentage as it's not in the Product interface
         store: mapRetailerToStore(p.retailer),
-        inStock: p.inStock,
+        // Remove inStock as it's not in the Product interface
         priceChange: {
           amount: 0,
           direction: 'stable' as const

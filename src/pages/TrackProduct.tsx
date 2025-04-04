@@ -1,6 +1,5 @@
 
-import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
+import React, { useState, useEffect } from 'react';
 import { Container } from '@/components/ui/container';
 import ProductScraper from '@/components/ProductScraper';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +13,14 @@ const TrackProduct = () => {
   const [scrapedProduct, setScrapedProduct] = useState<ScrapedProduct | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const { toast } = useToast();
+
+  // Set page title on component mount
+  useEffect(() => {
+    document.title = "Track Product Price | PriceWise";
+    return () => {
+      document.title = "PriceWise"; // Reset title on unmount
+    };
+  }, []);
 
   // Handle when a product is found via scraping
   const handleProductFound = (product: ScrapedProduct) => {
@@ -43,133 +50,127 @@ const TrackProduct = () => {
   ];
 
   return (
-    <>
-      <Helmet>
-        <title>Track Product Price | PriceWise</title>
-      </Helmet>
-      
-      <Container className="py-8">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Track Product Price</h1>
-          
-          {/* Product Scraper */}
-          <ProductScraper 
-            onProductFound={handleProductFound} 
-            className="mb-8"
-          />
-          
-          {/* Scraped Product Details */}
-          {scrapedProduct && (
-            <div className="space-y-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    {/* Product Image */}
-                    <div className="w-full md:w-1/3">
-                      <img 
-                        src={scrapedProduct.image} 
-                        alt={scrapedProduct.title} 
-                        className="w-full h-auto object-contain"
-                      />
+    <Container className="py-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8">Track Product Price</h1>
+        
+        {/* Product Scraper */}
+        <ProductScraper 
+          onProductFound={handleProductFound} 
+          className="mb-8"
+        />
+        
+        {/* Scraped Product Details */}
+        {scrapedProduct && (
+          <div className="space-y-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Product Image */}
+                  <div className="w-full md:w-1/3">
+                    <img 
+                      src={scrapedProduct.image} 
+                      alt={scrapedProduct.title} 
+                      className="w-full h-auto object-contain"
+                    />
+                  </div>
+                  
+                  {/* Product Info */}
+                  <div className="w-full md:w-2/3 space-y-4">
+                    <div>
+                      <h2 className="text-xl font-semibold mb-2">
+                        {scrapedProduct.title}
+                      </h2>
+                      <div className="text-sm text-gray-500">
+                        From {scrapedProduct.retailer}
+                      </div>
                     </div>
                     
-                    {/* Product Info */}
-                    <div className="w-full md:w-2/3 space-y-4">
-                      <div>
-                        <h2 className="text-xl font-semibold mb-2">
-                          {scrapedProduct.title}
-                        </h2>
-                        <div className="text-sm text-gray-500">
-                          From {scrapedProduct.retailer}
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-2xl font-bold">
-                          ${scrapedProduct.price.toFixed(2)}
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold">
+                        ${scrapedProduct.price.toFixed(2)}
+                      </span>
+                      {scrapedProduct.originalPrice && (
+                        <span className="text-gray-500 line-through">
+                          ${scrapedProduct.originalPrice.toFixed(2)}
                         </span>
-                        {scrapedProduct.originalPrice && (
-                          <span className="text-gray-500 line-through">
-                            ${scrapedProduct.originalPrice.toFixed(2)}
-                          </span>
+                      )}
+                    </div>
+                    
+                    {/* Actions */}
+                    <div className="flex flex-wrap gap-3 pt-2">
+                      <Button
+                        variant={isTracking ? "outline" : "default"}
+                        onClick={toggleTracking}
+                      >
+                        {isTracking ? (
+                          <>
+                            <BellOff className="h-4 w-4 mr-2" />
+                            Stop Tracking
+                          </>
+                        ) : (
+                          <>
+                            <Bell className="h-4 w-4 mr-2" />
+                            Track Price
+                          </>
                         )}
-                      </div>
+                      </Button>
                       
-                      {/* Actions */}
-                      <div className="flex flex-wrap gap-3 pt-2">
-                        <Button
-                          variant={isTracking ? "outline" : "default"}
-                          onClick={toggleTracking}
+                      <Button variant="outline">
+                        <Clock className="h-4 w-4 mr-2" />
+                        Price History
+                      </Button>
+                      
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(scrapedProduct.link);
+                          toast({
+                            title: "Link Copied",
+                            description: "Product link copied to clipboard",
+                          });
+                        }}
+                      >
+                        <Clipboard className="h-4 w-4 mr-2" />
+                        Copy Link
+                      </Button>
+                      
+                      <Button
+                        variant="outline" 
+                        asChild
+                      >
+                        <a 
+                          href={scrapedProduct.link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
                         >
-                          {isTracking ? (
-                            <>
-                              <BellOff className="h-4 w-4 mr-2" />
-                              Stop Tracking
-                            </>
-                          ) : (
-                            <>
-                              <Bell className="h-4 w-4 mr-2" />
-                              Track Price
-                            </>
-                          )}
-                        </Button>
-                        
-                        <Button variant="outline">
-                          <Clock className="h-4 w-4 mr-2" />
-                          Price History
-                        </Button>
-                        
-                        <Button 
-                          variant="outline"
-                          onClick={() => {
-                            navigator.clipboard.writeText(scrapedProduct.link);
-                            toast({
-                              title: "Link Copied",
-                              description: "Product link copied to clipboard",
-                            });
-                          }}
-                        >
-                          <Clipboard className="h-4 w-4 mr-2" />
-                          Copy Link
-                        </Button>
-                        
-                        <Button
-                          variant="outline" 
-                          asChild
-                        >
-                          <a 
-                            href={scrapedProduct.link} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Visit Store
-                          </a>
-                        </Button>
-                      </div>
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Visit Store
+                        </a>
+                      </Button>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Price History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <PriceHistoryChart 
-                    data={mockPriceHistory} 
-                    currentPrice={scrapedProduct.price}
-                    lowestPrice={Math.min(...mockPriceHistory.map(d => d.price))}
-                    expectedPrice={scrapedProduct.price * 0.9} // Simulated expected price (10% lower)
-                  />
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </div>
-      </Container>
-    </>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Price History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PriceHistoryChart 
+                  data={mockPriceHistory} 
+                  currentPrice={scrapedProduct.price}
+                  lowestPrice={Math.min(...mockPriceHistory.map(d => d.price))}
+                  expectedPrice={scrapedProduct.price * 0.9} // Simulated expected price (10% lower)
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
+    </Container>
   );
 };
 

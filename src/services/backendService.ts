@@ -14,16 +14,31 @@ export interface AIAdvice {
   reasoning: string;
 }
 
-// Backend service to connect with our Supabase backend
-// This will replace the mock API calls in the future
+// Backend service to connect with our backend
 export const backendService = {
   // Get all products matching search query
   searchProducts: async (query: string): Promise<Product[]> => {
     try {
       // For now, use the existing mock data service
-      // In the future, this will connect to Supabase
       const { productService } = await import('./productService');
-      return await productService.searchProducts(query);
+      const products = await productService.searchProducts(query);
+      
+      // Map to match the Product interface from ProductCard
+      return products.map(p => ({
+        id: p.id,
+        title: p.title,
+        image: p.image,
+        rating: p.rating,
+        reviewCount: p.reviews,
+        description: p.description,
+        currentPrice: p.price,
+        originalPrice: p.originalPrice,
+        discountPercentage: p.discountPercentage,
+        store: p.retailer,
+        inStock: p.inStock,
+        priceChange: 0, // Default value for compatibility
+        link: p.link
+      }));
     } catch (error) {
       console.error('Error searching products:', error);
       return [];
@@ -34,7 +49,26 @@ export const backendService = {
   getProductById: async (id: string): Promise<Product | null> => {
     try {
       const { productService } = await import('./productService');
-      return await productService.getProductById(id);
+      const product = await productService.getProductById(id);
+      
+      if (!product) return null;
+      
+      // Map to match the Product interface from ProductCard
+      return {
+        id: product.id,
+        title: product.title,
+        image: product.image,
+        rating: product.rating,
+        reviewCount: product.reviews,
+        description: product.description,
+        currentPrice: product.price,
+        originalPrice: product.originalPrice,
+        discountPercentage: product.discountPercentage,
+        store: product.retailer,
+        inStock: product.inStock,
+        priceChange: 0, // Default value for compatibility
+        link: product.link
+      };
     } catch (error) {
       console.error('Error getting product details:', error);
       return null;
@@ -45,7 +79,14 @@ export const backendService = {
   getPriceHistory: async (productId: string): Promise<PriceHistory[]> => {
     try {
       const { productService } = await import('./productService');
-      return await productService.getPriceHistory(productId);
+      const priceHistoryData = await productService.getPriceHistory(productId);
+      
+      // Add retailer field to match our PriceHistory interface
+      const product = await productService.getProductById(productId);
+      return priceHistoryData.map(item => ({
+        ...item,
+        retailer: product?.retailer || 'Unknown'
+      }));
     } catch (error) {
       console.error('Error getting price history:', error);
       return [];
@@ -58,8 +99,7 @@ export const backendService = {
       // Simulate an AI advice API call
       await new Promise(resolve => setTimeout(resolve, 1200));
       
-      // In the future, this would connect to an OpenAI integration
-      // via Supabase Edge Functions
+      // In the future, this would connect to an AI integration
       return {
         recommendation: "Wait for a better price",
         confidence: 0.85,
@@ -79,7 +119,24 @@ export const backendService = {
   getPriceComparisons: async (productTitle: string): Promise<Product[]> => {
     try {
       const { productService } = await import('./productService');
-      return await productService.getPriceComparison(productTitle);
+      const products = await productService.getPriceComparison(productTitle);
+      
+      // Map to match the Product interface from ProductCard
+      return products.map(p => ({
+        id: p.id,
+        title: p.title,
+        image: p.image,
+        rating: p.rating,
+        reviewCount: p.reviews,
+        description: p.description,
+        currentPrice: p.price,
+        originalPrice: p.originalPrice,
+        discountPercentage: p.discountPercentage,
+        store: p.retailer,
+        inStock: p.inStock,
+        priceChange: 0, // Default value for compatibility
+        link: p.link
+      }));
     } catch (error) {
       console.error('Error getting price comparisons:', error);
       return [];

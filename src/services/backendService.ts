@@ -50,6 +50,7 @@ export const backendService = {
         title: p.title,
         image: p.image,
         rating: p.rating,
+        // reviewCount has been changed to match Product interface
         reviewCount: p.reviews,
         description: p.description,
         currentPrice: p.price,
@@ -84,7 +85,6 @@ export const backendService = {
         image: product.image,
         rating: product.rating,
         reviewCount: product.reviews,
-        description: product.description,
         currentPrice: product.price,
         originalPrice: product.originalPrice || product.price,
         discountPercentage: product.discountPercentage,
@@ -155,7 +155,6 @@ export const backendService = {
         image: p.image,
         rating: p.rating,
         reviewCount: p.reviews,
-        description: p.description,
         currentPrice: p.price,
         originalPrice: p.originalPrice || p.price,
         discountPercentage: p.discountPercentage,

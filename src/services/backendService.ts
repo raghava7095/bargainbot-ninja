@@ -14,6 +14,27 @@ export interface AIAdvice {
   reasoning: string;
 }
 
+// Helper function to ensure retailer name matches allowed values
+const mapRetailerToStore = (retailer: string): 'Amazon' | 'Flipkart' | 'Walmart' | 'Target' | 'BestBuy' => {
+  // Map retailer names to the allowed store values
+  switch(retailer) {
+    case 'Amazon':
+      return 'Amazon';
+    case 'Best Buy':
+      return 'BestBuy';
+    case 'Walmart':
+      return 'Walmart';
+    case 'Target':
+      return 'Target';
+    case 'Flipkart':
+      return 'Flipkart';
+    default:
+      // Default to Amazon if the retailer isn't in our allowed list
+      console.warn(`Unknown retailer: ${retailer}, defaulting to Amazon`);
+      return 'Amazon';
+  }
+};
+
 // Backend service to connect with our backend
 export const backendService = {
   // Get all products matching search query
@@ -32,11 +53,14 @@ export const backendService = {
         reviewCount: p.reviews,
         description: p.description,
         currentPrice: p.price,
-        originalPrice: p.originalPrice,
+        originalPrice: p.originalPrice || p.price,
         discountPercentage: p.discountPercentage,
-        store: p.retailer,
+        store: mapRetailerToStore(p.retailer),
         inStock: p.inStock,
-        priceChange: 0, // Default value for compatibility
+        priceChange: {
+          amount: 0,
+          direction: 'stable' as const
+        },
         link: p.link
       }));
     } catch (error) {
@@ -62,11 +86,14 @@ export const backendService = {
         reviewCount: product.reviews,
         description: product.description,
         currentPrice: product.price,
-        originalPrice: product.originalPrice,
+        originalPrice: product.originalPrice || product.price,
         discountPercentage: product.discountPercentage,
-        store: product.retailer,
+        store: mapRetailerToStore(product.retailer),
         inStock: product.inStock,
-        priceChange: 0, // Default value for compatibility
+        priceChange: {
+          amount: 0,
+          direction: 'stable' as const
+        },
         link: product.link
       };
     } catch (error) {
@@ -130,11 +157,14 @@ export const backendService = {
         reviewCount: p.reviews,
         description: p.description,
         currentPrice: p.price,
-        originalPrice: p.originalPrice,
+        originalPrice: p.originalPrice || p.price,
         discountPercentage: p.discountPercentage,
-        store: p.retailer,
+        store: mapRetailerToStore(p.retailer),
         inStock: p.inStock,
-        priceChange: 0, // Default value for compatibility
+        priceChange: {
+          amount: 0,
+          direction: 'stable' as const
+        },
         link: p.link
       }));
     } catch (error) {

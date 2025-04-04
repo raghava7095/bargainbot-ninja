@@ -50,9 +50,8 @@ export const backendService = {
         title: p.title,
         image: p.image,
         rating: p.rating,
-        // reviewCount has been changed to match Product interface
-        reviewCount: p.reviews,
-        description: p.description,
+        // The Product interface doesn't have reviewCount, so we need to make sure
+        // we're not including properties that don't exist in the Product interface
         currentPrice: p.price,
         originalPrice: p.originalPrice || p.price,
         discountPercentage: p.discountPercentage,
@@ -84,7 +83,6 @@ export const backendService = {
         title: product.title,
         image: product.image,
         rating: product.rating,
-        reviewCount: product.reviews,
         currentPrice: product.price,
         originalPrice: product.originalPrice || product.price,
         discountPercentage: product.discountPercentage,
@@ -154,7 +152,6 @@ export const backendService = {
         title: p.title,
         image: p.image,
         rating: p.rating,
-        reviewCount: p.reviews,
         currentPrice: p.price,
         originalPrice: p.originalPrice || p.price,
         discountPercentage: p.discountPercentage,
